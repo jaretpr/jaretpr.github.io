@@ -421,13 +421,24 @@ function initCookieClicker() {
     const shop = document.getElementById('shop');
     if (!cookieBtn || !countDisplay || !shop) return;
 
+    // Store base text and owned count for shop items
+    Array.from(shop.options).forEach(option => {
+        const cost = parseInt(option.dataset.cost);
+        if (!isNaN(cost)) {
+            option.dataset.owned = option.dataset.owned || '0';
+            option.dataset.label = option.textContent.trim();
+        }
+    });
+
     function updateDisplay() {
         countDisplay.textContent = `Cookies: ${cookies.toLocaleString()}`;
 
         Array.from(shop.options).forEach(option => {
             const cost = parseInt(option.dataset.cost);
             if (!isNaN(cost)) {
-                option.disabled = cookies < cost || option.dataset.purchased === 'true';
+                const owned = parseInt(option.dataset.owned || '0');
+                option.disabled = cookies < cost;
+                option.textContent = `${option.dataset.label} (Owned: ${owned})`;
             }
         });
 
@@ -457,8 +468,8 @@ function initCookieClicker() {
                 autoClickers += increment;
             }
 
-            option.dataset.purchased = 'true';
-            option.textContent += ' (Owned)';
+            const owned = parseInt(option.dataset.owned || '0') + 1;
+            option.dataset.owned = owned.toString();
         }
 
         shop.selectedIndex = 0;

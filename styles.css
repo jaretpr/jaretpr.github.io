@@ -235,8 +235,8 @@ body {
 }
 
 #cookie-clicker {
-    width: 400px;
-    height: 400px;
+    width: min(90vw, 400px);
+    height: min(90vw, 400px);
     border-radius: 20px;
     border: 3px solid var(--primary-color);
     box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
@@ -856,6 +856,14 @@ section {
         width: 100%;
         max-width: 200px;
         text-align: center;
+    }
+
+    #cookie-clicker {
+        gap: 0.5rem;
+    }
+
+    #cookie {
+        font-size: 3rem;
     }
 }
 
