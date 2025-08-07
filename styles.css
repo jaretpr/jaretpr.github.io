@@ -234,24 +234,33 @@ body {
     gap: 1rem;
 }
 
-#game-canvas {
+#cookie-clicker {
     width: 400px;
     height: 400px;
     border-radius: 20px;
     border: 3px solid var(--primary-color);
     box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
-    background: #000;
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
 }
 
-.game-controls {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+#cookie {
+    font-size: 4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
-.game-controls p {
-    margin: 0.25rem 0;
-    font-weight: 500;
+#cookie-count {
+    font-weight: 600;
+}
+
+.contact {
+    background: var(--bg-secondary);
 }
 
 @media (max-width: 768px) {

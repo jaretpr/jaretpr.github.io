@@ -290,17 +290,7 @@ function initSkillTags() {
 
 // Project card interactions
 function initProjectCards() {
-    const projectCards = document.querySelectorAll('.project-card');
-    
-    projectCards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            card.style.transform = 'translateY(-10px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'translateY(0) scale(1)';
-        });
-    });
+    // Hover effects removed to keep project cards at a fixed size
 }
 
 // Contact form validation (if added later)
@@ -419,95 +409,18 @@ function initLightbox() {
 }
 
 // Doodle Jump Game
-// Simple Snake Game
-let gameCanvas, gameCtx;
-const grid = 20;
-let snake, food, dx, dy, score, count = 0;
+// Simple Cookie Clicker
+let cookies = 0;
 
-function initSnakeGame() {
-    gameCanvas = document.getElementById('game-canvas');
-    if (!gameCanvas) return;
-    gameCtx = gameCanvas.getContext('2d');
-    gameCanvas.width = 400;
-    gameCanvas.height = 400;
-    document.addEventListener('keydown', handleSnakeControls);
-    resetSnakeGame();
-    requestAnimationFrame(snakeLoop);
-}
+function initCookieClicker() {
+    const cookieBtn = document.getElementById('cookie');
+    const countDisplay = document.getElementById('cookie-count');
+    if (!cookieBtn || !countDisplay) return;
 
-function resetSnakeGame() {
-    snake = [{ x: 200, y: 200 }];
-    dx = grid;
-    dy = 0;
-    score = 0;
-    placeFood();
-}
-
-function placeFood() {
-    food = {
-        x: Math.floor(Math.random() * (gameCanvas.width / grid)) * grid,
-        y: Math.floor(Math.random() * (gameCanvas.height / grid)) * grid
-    };
-}
-
-function handleSnakeControls(e) {
-    if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && dx === 0) {
-        dx = -grid; dy = 0;
-    } else if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && dy === 0) {
-        dy = -grid; dx = 0;
-    } else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && dx === 0) {
-        dx = grid; dy = 0;
-    } else if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && dy === 0) {
-        dy = grid; dx = 0;
-    } else if (e.key === ' ') {
-        resetSnakeGame();
-    }
-}
-
-function snakeLoop() {
-    requestAnimationFrame(snakeLoop);
-    if (++count < 4) return;
-    count = 0;
-
-    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-    snake.unshift(head);
-
-    // Wall collisions
-    if (head.x < 0 || head.x >= gameCanvas.width || head.y < 0 || head.y >= gameCanvas.height) {
-        resetSnakeGame();
-        return;
-    }
-
-    // Self collision
-    for (let i = 1; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-            resetSnakeGame();
-            return;
-        }
-    }
-
-    // Food collision
-    if (head.x === food.x && head.y === food.y) {
-        score++;
-        placeFood();
-    } else {
-        snake.pop();
-    }
-
-    // Draw food
-    gameCtx.fillStyle = '#ff4d4d';
-    gameCtx.fillRect(food.x, food.y, grid - 1, grid - 1);
-
-    // Draw snake
-    gameCtx.fillStyle = '#4ade80';
-    snake.forEach(cell => gameCtx.fillRect(cell.x, cell.y, grid - 1, grid - 1));
-
-    // Draw score
-    gameCtx.fillStyle = '#ffffff';
-    gameCtx.font = '16px Arial';
-    gameCtx.fillText(`Score: ${score}`, 10, 20);
+    cookieBtn.addEventListener('click', () => {
+        cookies++;
+        countDisplay.textContent = `Cookies: ${cookies}`;
+    });
 }
 
 // Project Carousel
@@ -611,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initProjectCards();
     initContactForm();
     initLightbox(); // Initialize lightbox
-    initSnakeGame(); // Initialize Snake game
+    initCookieClicker(); // Initialize cookie clicker game
     initProjectCarousel(); // Initialize project carousel
     
     // Add loading animation
