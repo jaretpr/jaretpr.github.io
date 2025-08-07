@@ -239,6 +239,7 @@ body {
     height: min(90vw, 400px);
     border-radius: 20px;
     border: 3px solid var(--primary-color);
+    box-sizing: border-box;
     box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
     background: radial-gradient(circle at center, #f5deb3, #d2b48c);
     color: #4b382a;
@@ -278,11 +279,6 @@ body {
     background: var(--bg-secondary);
 }
 
-@media (max-width: 768px) {
-    .hero-decoration {
-        display: none;
-    }
-}
 
 /* Section Styles */
 section {
@@ -644,7 +640,11 @@ section {
     .timeline {
         max-width: 100%;
     }
-    
+
+    .timeline::before {
+        display: none;
+    }
+
     .projects-carousel {
         max-width: 100%;
     }
@@ -653,13 +653,13 @@ section {
         width: 40px;
         height: 40px;
     }
-    
+
     .carousel-arrow.prev {
-        left: -60px;
+        left: 10px;
     }
-    
+
     .carousel-arrow.next {
-        right: -60px;
+        right: 10px;
     }
     
     .project-card {
@@ -829,9 +829,6 @@ section {
         padding: 60px 0;
     }
 
-    .hero-decoration {
-        display: none;
-    }
 }
 
 @media (max-width: 480px) {
