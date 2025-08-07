@@ -419,586 +419,95 @@ function initLightbox() {
 }
 
 // Doodle Jump Game
-let doodleCanvas, doodleCtx;
-let doodle = {
-    x: 200,
-    y: 400,
-    width: 40,
-    height: 40,
-    velocityY: 0,
-    velocityX: 0,
-    onGround: false,
-    direction: 1, // 1 for right, -1 for left
-    hasJetpack: false,
-    hasSpringShoes: false,
-    jetpackFuel: 0,
-    springShoeTime: 0
-};
+// Simple Snake Game
+let gameCanvas, gameCtx;
+const grid = 20;
+let snake, food, dx, dy, score, count = 0;
 
-let platforms = [];
-let monsters = [];
-let jetpacks = [];
-let springShoes = [];
-let score = 0;
-let gameOver = false;
-let keys = {};
-let gameSpeed = 2;
-let cameraY = 0;
-
-// Sprite images
-let sprites = {
-    doodle: null,
-    doodleLeft: null,
-    doodleRight: null,
-    doodleJetpack: null,
-    doodleSpring: null,
-    platform: null,
-    monster: null,
-    jetpack: null,
-    springShoes: null,
-    background: null,
-    cloud: null
-};
-
-// Load sprites
-function loadSprites() {
-    const spritePromises = [
-        loadImage('Doodle Jump/Doodle Jump/puca.png'),
-        loadImage('Doodle Jump/Doodle Jump/puca-odskok.png'),
-        loadImage('Doodle Jump/Doodle Jump/jetpack-puca.png'),
-        loadImage('Doodle Jump/Doodle Jump/springshoes-up.png'),
-        loadImage('Doodle Jump/Doodle Jump/game-tiles.png'),
-        loadImage('Doodle Jump/Doodle Jump/ach-monster-chopper.png'),
-        loadImage('Doodle Jump/Doodle Jump/jetpack.png'),
-        loadImage('Doodle Jump/Doodle Jump/springshoes-side.png'),
-        loadImage('Doodle Jump/Doodle Jump/bck.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-bck.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-puca.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-puca-odskok.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-right.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-right-odskok.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-left.png'),
-        loadImage('Doodle Jump/Doodle Jump/space-left-odskok.png')
-    ];
-
-    Promise.all(spritePromises).then((images) => {
-        sprites.doodle = images[0];
-        sprites.doodleLeft = images[1];
-        sprites.doodleRight = images[1];
-        sprites.doodleJetpack = images[2];
-        sprites.doodleSpring = images[3];
-        sprites.platform = images[4];
-        sprites.monster = images[5];
-        sprites.jetpack = images[6];
-        sprites.springShoes = images[7];
-        sprites.background = images[8];
-        sprites.spaceBackground = images[9];
-        sprites.spaceDoodle = images[10];
-        sprites.spaceDoodleJump = images[11];
-        sprites.spaceRight = images[12];
-        sprites.spaceRightJump = images[13];
-        sprites.spaceLeft = images[14];
-        sprites.spaceLeftJump = images[15];
-        
-        // Start the game once sprites are loaded
-        initDoodleJump();
-    }).catch(error => {
-        console.error('Error loading sprites:', error);
-        // Fallback to basic game if sprites fail to load
-        initDoodleJump();
-    });
+function initSnakeGame() {
+    gameCanvas = document.getElementById('game-canvas');
+    if (!gameCanvas) return;
+    gameCtx = gameCanvas.getContext('2d');
+    gameCanvas.width = 400;
+    gameCanvas.height = 400;
+    document.addEventListener('keydown', handleSnakeControls);
+    resetSnakeGame();
+    requestAnimationFrame(snakeLoop);
 }
 
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-        img.src = src;
-    });
-}
-
-function initDoodleJump() {
-    doodleCanvas = document.getElementById('doodle-canvas');
-    if (!doodleCanvas) return;
-    
-    doodleCtx = doodleCanvas.getContext('2d');
-    doodleCanvas.width = 400;
-    doodleCanvas.height = 600;
-    
-    // Initialize platforms
-    for (let i = 0; i < 12; i++) {
-        platforms.push({
-            x: Math.random() * (doodleCanvas.width - 80),
-            y: doodleCanvas.height - 100 - i * 70,
-            width: 80,
-            height: 15,
-            type: Math.random() < 0.2 ? 'moving' : 'static',
-            moveDirection: Math.random() < 0.5 ? 1 : -1,
-            moveSpeed: 1 + Math.random() * 2
-        });
-    }
-    
-    // Initialize monsters
-    for (let i = 0; i < 3; i++) {
-        monsters.push({
-            x: Math.random() * (doodleCanvas.width - 30),
-            y: doodleCanvas.height - 200 - i * 150,
-            width: 30,
-            height: 30,
-            direction: Math.random() < 0.5 ? 1 : -1,
-            speed: 1 + Math.random() * 2
-        });
-    }
-    
-    // Initialize power-ups
-    for (let i = 0; i < 2; i++) {
-        jetpacks.push({
-            x: Math.random() * (doodleCanvas.width - 20),
-            y: doodleCanvas.height - 300 - i * 200,
-            width: 20,
-            height: 20,
-            collected: false
-        });
-        
-        springShoes.push({
-            x: Math.random() * (doodleCanvas.width - 20),
-            y: doodleCanvas.height - 400 - i * 200,
-            width: 20,
-            height: 20,
-            collected: false
-        });
-    }
-    
-    // Event listeners
-    document.addEventListener('keydown', (e) => {
-        keys[e.key] = true;
-    });
-    
-    document.addEventListener('keyup', (e) => {
-        keys[e.key] = false;
-    });
-    
-    // Click to restart
-    doodleCanvas.addEventListener('click', () => {
-        if (gameOver) {
-            resetGame();
-        }
-    });
-    
-    // Start game loop
-    gameLoop();
-}
-
-function resetGame() {
-    doodle.x = 200;
-    doodle.y = 400;
-    doodle.velocityY = 0;
-    doodle.velocityX = 0;
-    doodle.hasJetpack = false;
-    doodle.hasSpringShoes = false;
-    doodle.jetpackFuel = 0;
-    doodle.springShoeTime = 0;
+function resetSnakeGame() {
+    snake = [{ x: 200, y: 200 }];
+    dx = grid;
+    dy = 0;
     score = 0;
-    gameOver = false;
-    gameSpeed = 2;
-    cameraY = 0;
-    
-    // Reset platforms
-    platforms = [];
-    for (let i = 0; i < 12; i++) {
-        platforms.push({
-            x: Math.random() * (doodleCanvas.width - 80),
-            y: doodleCanvas.height - 100 - i * 70,
-            width: 80,
-            height: 15,
-            type: Math.random() < 0.2 ? 'moving' : 'static',
-            moveDirection: Math.random() < 0.5 ? 1 : -1,
-            moveSpeed: 1 + Math.random() * 2
-        });
-    }
-    
-    // Reset monsters
-    monsters = [];
-    for (let i = 0; i < 3; i++) {
-        monsters.push({
-            x: Math.random() * (doodleCanvas.width - 30),
-            y: doodleCanvas.height - 200 - i * 150,
-            width: 30,
-            height: 30,
-            direction: Math.random() < 0.5 ? 1 : -1,
-            speed: 1 + Math.random() * 2
-        });
-    }
-    
-    // Reset power-ups
-    jetpacks = [];
-    springShoes = [];
-    for (let i = 0; i < 2; i++) {
-        jetpacks.push({
-            x: Math.random() * (doodleCanvas.width - 20),
-            y: doodleCanvas.height - 300 - i * 200,
-            width: 20,
-            height: 20,
-            collected: false
-        });
-        
-        springShoes.push({
-            x: Math.random() * (doodleCanvas.width - 20),
-            y: doodleCanvas.height - 400 - i * 200,
-            width: 20,
-            height: 20,
-            collected: false
-        });
+    placeFood();
+}
+
+function placeFood() {
+    food = {
+        x: Math.floor(Math.random() * (gameCanvas.width / grid)) * grid,
+        y: Math.floor(Math.random() * (gameCanvas.height / grid)) * grid
+    };
+}
+
+function handleSnakeControls(e) {
+    if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && dx === 0) {
+        dx = -grid; dy = 0;
+    } else if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && dy === 0) {
+        dy = -grid; dx = 0;
+    } else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && dx === 0) {
+        dx = grid; dy = 0;
+    } else if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && dy === 0) {
+        dy = grid; dx = 0;
+    } else if (e.key === ' ') {
+        resetSnakeGame();
     }
 }
 
-function updateGame() {
-    if (gameOver) return;
-    
-    // Handle input
-    if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-        doodle.velocityX = -5;
-        doodle.direction = -1;
-    } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-        doodle.velocityX = 5;
-        doodle.direction = 1;
+function snakeLoop() {
+    requestAnimationFrame(snakeLoop);
+    if (++count < 4) return;
+    count = 0;
+
+    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    snake.unshift(head);
+
+    // Wall collisions
+    if (head.x < 0 || head.x >= gameCanvas.width || head.y < 0 || head.y >= gameCanvas.height) {
+        resetSnakeGame();
+        return;
+    }
+
+    // Self collision
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+            resetSnakeGame();
+            return;
+        }
+    }
+
+    // Food collision
+    if (head.x === food.x && head.y === food.y) {
+        score++;
+        placeFood();
     } else {
-        doodle.velocityX *= 0.8; // Friction
+        snake.pop();
     }
-    
-    // Jetpack control
-    if (doodle.hasJetpack && doodle.jetpackFuel > 0 && (keys['ArrowUp'] || keys['w'] || keys['W'])) {
-        doodle.velocityY = -8;
-        doodle.jetpackFuel--;
-        if (doodle.jetpackFuel <= 0) {
-            doodle.hasJetpack = false;
-        }
-    }
-    
-    // Update doodle position
-    doodle.x += doodle.velocityX;
-    
-    // Wrap around screen
-    if (doodle.x < -doodle.width) doodle.x = doodleCanvas.width;
-    if (doodle.x > doodleCanvas.width) doodle.x = -doodle.width;
-    
-    // Apply gravity
-    doodle.velocityY += 0.5;
-    doodle.y += doodle.velocityY;
-    
-    // Update spring shoe timer
-    if (doodle.springShoeTime > 0) {
-        doodle.springShoeTime--;
-        if (doodle.springShoeTime <= 0) {
-            doodle.hasSpringShoes = false;
-        }
-    }
-    
-    // Check platform collisions
-    doodle.onGround = false;
-    for (let platform of platforms) {
-        if (doodle.x < platform.x + platform.width &&
-            doodle.x + doodle.width > platform.x &&
-            doodle.y + doodle.height > platform.y &&
-            doodle.y + doodle.height < platform.y + platform.height + 10 &&
-            doodle.velocityY > 0) {
-            
-            doodle.y = platform.y - doodle.height;
-            doodle.velocityY = doodle.hasSpringShoes ? -18 : -12; // Higher jump with spring shoes
-            doodle.onGround = true;
-            break;
-        }
-    }
-    
-    // Update platforms
-    for (let platform of platforms) {
-        platform.y -= gameSpeed;
-        
-        // Move moving platforms
-        if (platform.type === 'moving') {
-            platform.x += platform.moveDirection * platform.moveSpeed;
-            if (platform.x <= 0 || platform.x >= doodleCanvas.width - platform.width) {
-                platform.moveDirection *= -1;
-            }
-        }
-        
-        // Remove platforms that are off screen
-        if (platform.y < -platform.height) {
-            platform.y = doodleCanvas.height;
-            platform.x = Math.random() * (doodleCanvas.width - platform.width);
-            platform.type = Math.random() < 0.2 ? 'moving' : 'static';
-            platform.moveDirection = Math.random() < 0.5 ? 1 : -1;
-            platform.moveSpeed = 1 + Math.random() * 2;
-        }
-    }
-    
-    // Update monsters
-    for (let monster of monsters) {
-        monster.y -= gameSpeed;
-        monster.x += monster.direction * monster.speed;
-        
-        // Bounce off walls
-        if (monster.x <= 0 || monster.x >= doodleCanvas.width - monster.width) {
-            monster.direction *= -1;
-        }
-        
-        // Remove monsters that are off screen
-        if (monster.y < -monster.height) {
-            monster.y = doodleCanvas.height + Math.random() * 200;
-            monster.x = Math.random() * (doodleCanvas.width - monster.width);
-        }
-        
-        // Check collision with monster
-        if (doodle.x < monster.x + monster.width &&
-            doodle.x + doodle.width > monster.x &&
-            doodle.y < monster.y + monster.height &&
-            doodle.y + doodle.height > monster.y) {
-            gameOver = true;
-        }
-    }
-    
-    // Update power-ups
-    for (let jetpack of jetpacks) {
-        if (!jetpack.collected) {
-            jetpack.y -= gameSpeed;
-            
-            // Check collision with jetpack
-            if (doodle.x < jetpack.x + jetpack.width &&
-                doodle.x + doodle.width > jetpack.x &&
-                doodle.y < jetpack.y + jetpack.height &&
-                doodle.y + doodle.height > jetpack.y) {
-                jetpack.collected = true;
-                doodle.hasJetpack = true;
-                doodle.jetpackFuel = 100;
-            }
-            
-            // Remove jetpacks that are off screen
-            if (jetpack.y < -jetpack.height) {
-                jetpack.y = doodleCanvas.height + Math.random() * 300;
-                jetpack.x = Math.random() * (doodleCanvas.width - jetpack.width);
-                jetpack.collected = false;
-            }
-        }
-    }
-    
-    for (let springShoe of springShoes) {
-        if (!springShoe.collected) {
-            springShoe.y -= gameSpeed;
-            
-            // Check collision with spring shoes
-            if (doodle.x < springShoe.x + springShoe.width &&
-                doodle.x + doodle.width > springShoe.x &&
-                doodle.y < springShoe.y + springShoe.height &&
-                doodle.y + doodle.height > springShoe.y) {
-                springShoe.collected = true;
-                doodle.hasSpringShoes = true;
-                doodle.springShoeTime = 300; // 5 seconds at 60fps
-            }
-            
-            // Remove spring shoes that are off screen
-            if (springShoe.y < -springShoe.height) {
-                springShoe.y = doodleCanvas.height + Math.random() * 300;
-                springShoe.x = Math.random() * (doodleCanvas.width - springShoe.width);
-                springShoe.collected = false;
-            }
-        }
-    }
-    
-    // Update camera and score based on height
-    if (doodle.y < doodleCanvas.height / 2) {
-        const heightGained = doodleCanvas.height / 2 - doodle.y;
-        cameraY += heightGained;
-        score += heightGained * 2; // Score based on height gained
-        doodle.y = doodleCanvas.height / 2;
-        
-        // Increase game speed based on height
-        if (cameraY > 1000 && cameraY % 500 === 0) {
-            gameSpeed += 0.5;
-        }
-    }
-    
-    // Check game over - fall below screen
-    if (doodle.y > doodleCanvas.height) {
-        gameOver = true;
-    }
-}
 
-function drawGame() {
-    // Clear canvas
-    doodleCtx.fillStyle = '#000033'; // Dark blue space background
-    doodleCtx.fillRect(0, 0, doodleCanvas.width, doodleCanvas.height);
-    
-    // Draw space background with parallax effect
-    if (sprites.spaceBackground) {
-        const bgY = (cameraY * 0.3) % sprites.spaceBackground.height;
-        doodleCtx.drawImage(sprites.spaceBackground, 0, bgY - sprites.spaceBackground.height, doodleCanvas.width, sprites.spaceBackground.height);
-        doodleCtx.drawImage(sprites.spaceBackground, 0, bgY, doodleCanvas.width, sprites.spaceBackground.height);
-    }
-    
-    // Draw stars
-    drawStars();
-    
-    // Draw platforms
-    for (let platform of platforms) {
-        if (sprites.platform) {
-            doodleCtx.drawImage(sprites.platform, platform.x, platform.y, platform.width, platform.height);
-        } else {
-            // Fallback to rectangle
-            doodleCtx.fillStyle = '#228B22';
-            doodleCtx.fillRect(platform.x, platform.y, platform.width, platform.height);
-        }
-    }
-    
-    // Draw monsters
-    for (let monster of monsters) {
-        if (sprites.monster) {
-            doodleCtx.save();
-            if (monster.direction < 0) {
-                doodleCtx.scale(-1, 1);
-                doodleCtx.drawImage(sprites.monster, -monster.x - monster.width, monster.y, monster.width, monster.height);
-            } else {
-                doodleCtx.drawImage(sprites.monster, monster.x, monster.y, monster.width, monster.height);
-            }
-            doodleCtx.restore();
-        } else {
-            // Fallback to rectangle
-            doodleCtx.fillStyle = '#FF0000';
-            doodleCtx.fillRect(monster.x, monster.y, monster.width, monster.height);
-        }
-    }
-    
-    // Draw power-ups
-    for (let jetpack of jetpacks) {
-        if (!jetpack.collected && sprites.jetpack) {
-            doodleCtx.drawImage(sprites.jetpack, jetpack.x, jetpack.y, jetpack.width, jetpack.height);
-        }
-    }
-    
-    for (let springShoe of springShoes) {
-        if (!springShoe.collected && sprites.springShoes) {
-            doodleCtx.drawImage(sprites.springShoes, springShoe.x, springShoe.y, springShoe.width, springShoe.height);
-        }
-    }
-    
-    // Draw doodle
-    drawDoodle();
-    
-    // Draw UI
-    drawUI();
-    
-    // Draw game over screen
-    if (gameOver) {
-        drawGameOver();
-    }
-}
+    // Draw food
+    gameCtx.fillStyle = '#ff4d4d';
+    gameCtx.fillRect(food.x, food.y, grid - 1, grid - 1);
 
-function drawStars() {
-    doodleCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    const starPositions = [
-        { x: 50, y: 100 - cameraY * 0.2 },
-        { x: 300, y: 150 - cameraY * 0.2 },
-        { x: 200, y: 80 - cameraY * 0.2 },
-        { x: 350, y: 120 - cameraY * 0.2 },
-        { x: 150, y: 200 - cameraY * 0.2 },
-        { x: 250, y: 60 - cameraY * 0.2 }
-    ];
-    
-    for (let star of starPositions) {
-        if (star.y > -20 && star.y < doodleCanvas.height + 20) {
-            doodleCtx.beginPath();
-            doodleCtx.arc(star.x, star.y, 2, 0, Math.PI * 2);
-            doodleCtx.fill();
-        }
-    }
-}
+    // Draw snake
+    gameCtx.fillStyle = '#4ade80';
+    snake.forEach(cell => gameCtx.fillRect(cell.x, cell.y, grid - 1, grid - 1));
 
-function drawDoodle() {
-    let spriteToUse = sprites.spaceDoodle;
-    
-    if (doodle.hasJetpack && sprites.doodleJetpack) {
-        spriteToUse = sprites.doodleJetpack;
-    } else if (doodle.hasSpringShoes && sprites.doodleSpring) {
-        spriteToUse = sprites.doodleSpring;
-    } else if (doodle.velocityY < 0 && sprites.spaceDoodleJump) {
-        // Use jumping sprite when moving upward
-        spriteToUse = sprites.spaceDoodleJump;
-    }
-    
-    if (spriteToUse) {
-        doodleCtx.save();
-        if (doodle.direction < 0) {
-            doodleCtx.scale(-1, 1);
-            doodleCtx.drawImage(spriteToUse, -doodle.x - doodle.width, doodle.y, doodle.width, doodle.height);
-        } else {
-            doodleCtx.drawImage(spriteToUse, doodle.x, doodle.y, doodle.width, doodle.height);
-        }
-        doodleCtx.restore();
-    } else {
-        // Fallback to rectangle
-        doodleCtx.fillStyle = '#FF6B6B';
-        doodleCtx.fillRect(doodle.x, doodle.y, doodle.width, doodle.height);
-        
-        // Draw face
-        doodleCtx.fillStyle = 'white';
-        doodleCtx.fillRect(doodle.x + 8, doodle.y + 8, 8, 8);
-        doodleCtx.fillRect(doodle.x + 24, doodle.y + 8, 8, 8);
-        
-        doodleCtx.fillStyle = 'black';
-        doodleCtx.fillRect(doodle.x + 10, doodle.y + 10, 4, 4);
-        doodleCtx.fillRect(doodle.x + 26, doodle.y + 10, 4, 4);
-    }
-}
-
-function drawUI() {
     // Draw score
-    doodleCtx.fillStyle = 'white';
-    doodleCtx.font = 'bold 24px Arial';
-    doodleCtx.fillText(`Score: ${Math.floor(score / 10)}`, 10, 30);
-    
-    // Draw power-up indicators
-    if (doodle.hasJetpack) {
-        doodleCtx.fillStyle = 'rgba(255, 255, 0, 0.8)';
-        doodleCtx.fillRect(10, 40, 20, 20);
-        doodleCtx.fillStyle = 'black';
-        doodleCtx.font = '12px Arial';
-        doodleCtx.fillText('J', 15, 55);
-        
-        // Draw fuel bar
-        doodleCtx.fillStyle = 'red';
-        doodleCtx.fillRect(35, 40, 50, 10);
-        doodleCtx.fillStyle = 'green';
-        doodleCtx.fillRect(35, 40, (doodle.jetpackFuel / 100) * 50, 10);
-    }
-    
-    if (doodle.hasSpringShoes) {
-        doodleCtx.fillStyle = 'rgba(0, 255, 255, 0.8)';
-        doodleCtx.fillRect(10, 70, 20, 20);
-        doodleCtx.fillStyle = 'black';
-        doodleCtx.font = '12px Arial';
-        doodleCtx.fillText('S', 15, 85);
-    }
-}
-
-function drawGameOver() {
-    doodleCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    doodleCtx.fillRect(0, 0, doodleCanvas.width, doodleCanvas.height);
-    
-    doodleCtx.fillStyle = 'white';
-    doodleCtx.font = 'bold 32px Arial';
-    doodleCtx.textAlign = 'center';
-    doodleCtx.fillText('Game Over!', doodleCanvas.width / 2, doodleCanvas.height / 2 - 40);
-    doodleCtx.font = '24px Arial';
-    doodleCtx.fillText(`Final Score: ${Math.floor(score / 10)}`, doodleCanvas.width / 2, doodleCanvas.height / 2);
-    doodleCtx.font = '18px Arial';
-    doodleCtx.fillText('Click to restart', doodleCanvas.width / 2, doodleCanvas.height / 2 + 40);
-    doodleCtx.textAlign = 'left';
-}
-
-function gameLoop() {
-    updateGame();
-    drawGame();
-    requestAnimationFrame(gameLoop);
+    gameCtx.fillStyle = '#ffffff';
+    gameCtx.font = '16px Arial';
+    gameCtx.fillText(`Score: ${score}`, 10, 20);
 }
 
 // Project Carousel
@@ -1102,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initProjectCards();
     initContactForm();
     initLightbox(); // Initialize lightbox
-    loadSprites(); // Initialize Doodle Jump sprites
+    initSnakeGame(); // Initialize Snake game
     initProjectCarousel(); // Initialize project carousel
     
     // Add loading animation
