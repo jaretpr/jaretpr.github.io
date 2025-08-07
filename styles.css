@@ -806,11 +806,12 @@ section {
     }
     
     .timeline::before {
-        left: 20px;
+        display: none;
     }
-    
+
     .timeline-content {
-        margin-left: 40px;
+        margin-left: 0;
+        text-align: center;
     }
     
     .project-gallery {
