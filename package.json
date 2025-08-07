@@ -1,0 +1,36 @@
+{
+  "name": "jaret-priddy-portfolio",
+  "version": "1.0.0",
+  "description": "A modern, interactive portfolio website for Jaret Priddy built with HTML, CSS, JavaScript, and Three.js",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": [
+    "portfolio",
+    "threejs",
+    "web-development",
+    "interactive",
+    "responsive",
+    "animation"
+  ],
+  "author": "Jaret Priddy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaretpriddy/portfolio"
+  },
+  "homepage": "https://jaretpriddy.github.io/portfolio",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
