@@ -52,10 +52,18 @@
                 <div id="cookie-clicker">
                     <div id="cookie-count">Cookies: 0</div>
                     <button id="cookie">🍪</button>
-                    <div id="upgrades">
-                        <button id="double-click" class="upgrade" data-cost="10" style="display:none;">Double Click (10)</button>
-                        <button id="auto-clicker" class="upgrade" data-cost="50" style="display:none;">Auto Clicker (50)</button>
-                    </div>
+                    <select id="shop">
+                        <option disabled selected>Shop</option>
+                        <option value="double" data-cost="10" data-type="click" data-increment="1">
+                            Double Click – Adds +1 cookie per click (10)
+                        </option>
+                        <option value="mega" data-cost="100" data-type="click" data-increment="10">
+                            Mega Click – Adds +10 cookies per click (100)
+                        </option>
+                        <option value="auto" data-cost="50" data-type="auto" data-increment="1">
+                            Auto Clicker – Generates 1 cookie per second (50)
+                        </option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -125,7 +133,7 @@
                         <div class="timeline-header">
                             <h3>Information Technology Intern</h3>
                             <span class="company">Butler & Associates P.A.</span>
-                                                         <span class="duration">Jun 2023 – Present</span>
+                            <span class="duration">Jun 2023 – May 2025</span>
                         </div>
                         <div class="timeline-body">
                             <p class="location">Topeka, KS</p>
@@ -174,7 +182,7 @@
                     <div class="project-card active" data-index="0">
                         <div class="project-header">
                             <h3>Automated E-Filing System</h3>
-                            <span class="project-date">Jun 2023 - Present</span>
+                            <span class="project-date">Jun 2023</span>
                         </div>
                         <div class="project-gallery">
                             <img src="Images/Automated E-Filing GUI.png" alt="Automated E-Filing GUI" class="project-img" />

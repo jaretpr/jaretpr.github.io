@@ -413,23 +413,28 @@ function initLightbox() {
 let cookies = 0;
 let cookiesPerClick = 1;
 let autoClickers = 0;
+let gameWon = false;
 
 function initCookieClicker() {
     const cookieBtn = document.getElementById('cookie');
     const countDisplay = document.getElementById('cookie-count');
-    const doubleClickBtn = document.getElementById('double-click');
-    const autoClickerBtn = document.getElementById('auto-clicker');
-    if (!cookieBtn || !countDisplay) return;
+    const shop = document.getElementById('shop');
+    if (!cookieBtn || !countDisplay || !shop) return;
 
     function updateDisplay() {
-        countDisplay.textContent = `Cookies: ${cookies}`;
+        countDisplay.textContent = `Cookies: ${cookies.toLocaleString()}`;
 
-        [doubleClickBtn, autoClickerBtn].forEach(btn => {
-            if (!btn) return;
-            const cost = parseInt(btn.dataset.cost);
-            btn.style.display = cookies >= cost ? 'block' : 'none';
-            btn.disabled = cookies < cost;
+        Array.from(shop.options).forEach(option => {
+            const cost = parseInt(option.dataset.cost);
+            if (!isNaN(cost)) {
+                option.disabled = cookies < cost || option.dataset.purchased === 'true';
+            }
         });
+
+        if (!gameWon && cookies >= 1000000000) {
+            alert('You beat the game!');
+            gameWon = true;
+        }
     }
 
     cookieBtn.addEventListener('click', () => {
@@ -437,29 +442,28 @@ function initCookieClicker() {
         updateDisplay();
     });
 
-    if (doubleClickBtn) {
-        doubleClickBtn.addEventListener('click', () => {
-            const cost = parseInt(doubleClickBtn.dataset.cost);
-            if (cookies >= cost) {
-                cookies -= cost;
-                cookiesPerClick++;
-                doubleClickBtn.disabled = true;
-                doubleClickBtn.textContent = 'Double Click (Owned)';
-                updateDisplay();
-            }
-        });
-    }
+    shop.addEventListener('change', () => {
+        const option = shop.options[shop.selectedIndex];
+        const cost = parseInt(option.dataset.cost);
+        const type = option.dataset.type;
+        const increment = parseInt(option.dataset.increment);
 
-    if (autoClickerBtn) {
-        autoClickerBtn.addEventListener('click', () => {
-            const cost = parseInt(autoClickerBtn.dataset.cost);
-            if (cookies >= cost) {
-                cookies -= cost;
-                autoClickers++;
-                updateDisplay();
+        if (cookies >= cost) {
+            cookies -= cost;
+
+            if (type === 'click') {
+                cookiesPerClick += increment;
+            } else if (type === 'auto') {
+                autoClickers += increment;
             }
-        });
-    }
+
+            option.dataset.purchased = 'true';
+            option.textContent += ' (Owned)';
+        }
+
+        shop.selectedIndex = 0;
+        updateDisplay();
+    });
 
     setInterval(() => {
         if (autoClickers > 0) {
