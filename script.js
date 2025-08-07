@@ -411,16 +411,64 @@ function initLightbox() {
 // Doodle Jump Game
 // Simple Cookie Clicker
 let cookies = 0;
+let cookiesPerClick = 1;
+let autoClickers = 0;
 
 function initCookieClicker() {
     const cookieBtn = document.getElementById('cookie');
     const countDisplay = document.getElementById('cookie-count');
+    const doubleClickBtn = document.getElementById('double-click');
+    const autoClickerBtn = document.getElementById('auto-clicker');
     if (!cookieBtn || !countDisplay) return;
 
-    cookieBtn.addEventListener('click', () => {
-        cookies++;
+    function updateDisplay() {
         countDisplay.textContent = `Cookies: ${cookies}`;
+
+        [doubleClickBtn, autoClickerBtn].forEach(btn => {
+            if (!btn) return;
+            const cost = parseInt(btn.dataset.cost);
+            btn.style.display = cookies >= cost ? 'block' : 'none';
+            btn.disabled = cookies < cost;
+        });
+    }
+
+    cookieBtn.addEventListener('click', () => {
+        cookies += cookiesPerClick;
+        updateDisplay();
     });
+
+    if (doubleClickBtn) {
+        doubleClickBtn.addEventListener('click', () => {
+            const cost = parseInt(doubleClickBtn.dataset.cost);
+            if (cookies >= cost) {
+                cookies -= cost;
+                cookiesPerClick++;
+                doubleClickBtn.disabled = true;
+                doubleClickBtn.textContent = 'Double Click (Owned)';
+                updateDisplay();
+            }
+        });
+    }
+
+    if (autoClickerBtn) {
+        autoClickerBtn.addEventListener('click', () => {
+            const cost = parseInt(autoClickerBtn.dataset.cost);
+            if (cookies >= cost) {
+                cookies -= cost;
+                autoClickers++;
+                updateDisplay();
+            }
+        });
+    }
+
+    setInterval(() => {
+        if (autoClickers > 0) {
+            cookies += autoClickers;
+            updateDisplay();
+        }
+    }, 1000);
+
+    updateDisplay();
 }
 
 // Project Carousel
