@@ -172,7 +172,8 @@ function initScrollAnimations() {
     }, observerOptions);
     
     // Observe elements for animation
-    const animateElements = document.querySelectorAll('.timeline-content, .project-card, .skill-category, .contact-item');
+    // Exclude timeline-content to prevent initial vertical line flash
+    const animateElements = document.querySelectorAll('.project-card, .skill-category, .contact-item');
     animateElements.forEach(el => {
         el.classList.add('fade-in');
         observer.observe(el);
@@ -695,3 +696,4 @@ shakeStyle.textContent = `
     }
 `;
 document.head.appendChild(shakeStyle);
+
