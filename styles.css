@@ -348,15 +348,10 @@ section {
     transform: translateY(-2px);
 }
 
-/* Experience Section */
 .timeline {
     position: relative;
     max-width: 800px;
     margin: 0 auto;
-}
-
-.timeline::before {
-    content: none;
 }
 
 .timeline-item {
@@ -1041,4 +1036,5 @@ section {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
 }
+
 
