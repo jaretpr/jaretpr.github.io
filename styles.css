@@ -1037,7 +1037,7 @@ section {
     }
     
     .hero {
-        padding: 120px 0 20px;
+        padding: 120px 0 10px;
     }
     
     .hero-content {
@@ -1129,7 +1129,7 @@ section {
     }
     
     .about {
-        padding: 20px 0 60px;
+        padding: 10px 0 60px;
     }
 
 }
@@ -1348,11 +1348,11 @@ section {
     }
     
     .lightbox-prev {
-        left: -40px;
+        left: 10px;
     }
     
     .lightbox-next {
-        right: -40px;
+        right: 10px;
     }
 }
 
