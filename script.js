@@ -411,81 +411,81 @@ function initLightbox() {
 }
 
 // Doodle Jump Game
-// Simple Cookie Clicker
-let cookies = 0;
-let cookiesPerClick = 1;
-let autoClickers = 0;
-let gameWon = false;
-
-function initCookieClicker() {
-    const cookieBtn = document.getElementById('cookie');
-    const countDisplay = document.getElementById('cookie-count');
-    const shop = document.getElementById('shop');
-    if (!cookieBtn || !countDisplay || !shop) return;
-
-    // Store base text and owned count for shop items
-    Array.from(shop.options).forEach(option => {
-        const cost = parseInt(option.dataset.cost);
-        if (!isNaN(cost)) {
-            option.dataset.owned = option.dataset.owned || '0';
-            option.dataset.label = option.textContent.trim();
-        }
-    });
-
-    function updateDisplay() {
-        countDisplay.textContent = `Cookies: ${cookies.toLocaleString()}`;
-
-        Array.from(shop.options).forEach(option => {
-            const cost = parseInt(option.dataset.cost);
-            if (!isNaN(cost)) {
-                const owned = parseInt(option.dataset.owned || '0');
-                option.disabled = cookies < cost;
-                option.textContent = `${option.dataset.label} (Owned: ${owned})`;
+// Interactive Skill Orbit
+function initSkillOrbit() {
+    const orbitItems = document.querySelectorAll('.orbit-item');
+    const tooltip = document.getElementById('skill-tooltip');
+    
+    if (!tooltip) return;
+    
+    const skillDescriptions = {
+        'Python': 'Backend development, automation, AI/ML',
+        'JavaScript': 'Frontend & full-stack web development',
+        'React': 'Modern UI component library',
+        'AWS': 'Cloud infrastructure and services',
+        'Docker': 'Containerization and deployment',
+        'Git': 'Version control and collaboration',
+        'Node.js': 'Server-side JavaScript runtime',
+        'Database': 'SQL & NoSQL database management',
+        'AI/ML': 'Machine learning and artificial intelligence',
+        'Security': 'Cybersecurity and vulnerability assessment',
+        'Mobile': 'iOS and Android app development',
+        'Cloud': 'Cloud computing and architecture'
+    };
+    
+    orbitItems.forEach(item => {
+        item.addEventListener('mouseenter', (e) => {
+            const skill = e.target.dataset.skill;
+            if (skill && skillDescriptions[skill]) {
+                tooltip.textContent = `${skill}: ${skillDescriptions[skill]}`;
+                tooltip.classList.add('show');
             }
         });
-
-        if (!gameWon && cookies >= 1000000000) {
-            alert('You beat the game!');
-            gameWon = true;
-        }
-    }
-
-    cookieBtn.addEventListener('click', () => {
-        cookies += cookiesPerClick;
-        updateDisplay();
-    });
-
-    shop.addEventListener('change', () => {
-        const option = shop.options[shop.selectedIndex];
-        const cost = parseInt(option.dataset.cost);
-        const type = option.dataset.type;
-        const increment = parseInt(option.dataset.increment);
-
-        if (cookies >= cost) {
-            cookies -= cost;
-
-            if (type === 'click') {
-                cookiesPerClick += increment;
-            } else if (type === 'auto') {
-                autoClickers += increment;
+        
+        item.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('show');
+        });
+        
+        // Add click effect
+        item.addEventListener('click', (e) => {
+            const skill = e.target.dataset.skill;
+            if (skill) {
+                // Create ripple effect
+                const ripple = document.createElement('div');
+                ripple.style.position = 'absolute';
+                ripple.style.width = '100px';
+                ripple.style.height = '100px';
+                ripple.style.background = 'rgba(99, 102, 241, 0.3)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s ease-out';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.top = '50%';
+                ripple.style.left = '50%';
+                ripple.style.marginTop = '-50px';
+                ripple.style.marginLeft = '-50px';
+                
+                e.target.style.position = 'relative';
+                e.target.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
             }
-
-            const owned = parseInt(option.dataset.owned || '0') + 1;
-            option.dataset.owned = owned.toString();
-        }
-
-        shop.selectedIndex = 0;
-        updateDisplay();
+        });
     });
-
-    setInterval(() => {
-        if (autoClickers > 0) {
-            cookies += autoClickers;
-            updateDisplay();
+    
+    // Add ripple animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
         }
-    }, 1000);
-
-    updateDisplay();
+    `;
+    document.head.appendChild(style);
 }
 
 // Project Carousel
@@ -589,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initProjectCards();
     initContactForm();
     initLightbox(); // Initialize lightbox
-    initCookieClicker(); // Initialize cookie clicker game
+    initSkillOrbit(); // Initialize skill orbit
     initProjectCarousel(); // Initialize project carousel
     
     // Add loading animation
