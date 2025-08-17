@@ -500,6 +500,21 @@ function initProjectCarousel() {
     
     console.log('Found project cards:', projectCards.length); // Debug
     
+    // Initialize all cards to be hidden except the first one
+    projectCards.forEach((card, index) => {
+        card.classList.remove('active', 'prev');
+        if (index === 0) {
+            card.classList.add('active');
+        }
+    });
+    
+    // Initialize indicators
+    indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === 0);
+    });
+    
+    currentProjectIndex = 0;
+    
     if (prevBtn) {
         prevBtn.addEventListener('click', () => {
             console.log('Prev clicked, current index:', currentProjectIndex); // Debug
