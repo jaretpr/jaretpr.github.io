@@ -898,6 +898,19 @@ section {
         max-width: 100%;
         max-height: 150px;
     }
+    
+    .project-link {
+        align-self: center;
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
 }
 
 /* Contact Section */
